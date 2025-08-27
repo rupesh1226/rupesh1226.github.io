@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Auth (Sign-up / Login) — Firebase</title>
+  <style>
+    :root{--card:#111;--muted:#bbb}
+    html,body{height:100%;margin:0}
+    body{background:#000;color:#fff;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;display:flex;align-items:center;justify-content:center;padding:24px}
+    .wrap{width:100%;max-width:420px;border-radius:12px;padding:20px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));box-shadow:0 6px 30px rgba(0,0,0,0.6)}
+    h1{font-size:20px;margin:0 0 12px;text-align:center}
+    .tabs{display:flex;gap:6px;margin-bottom:12px}
+    .tabs button{flex:1;padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:var(--muted);cursor:pointer}
+    .tabs button.active{color:#fff;background:rgba(255,255,255,0.03)}
+    form{display:flex;flex-direction:column;gap:10px}
+    label{font-size:13px;color:var(--muted)}
+    input{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:transparent;color:#fff;outline:none}
+    .row{display:flex;gap:8px}
+    .row .half{flex:1}
+    button.btn{padding:10px;border-radius:10px;border:0;cursor:pointer;background:#fff;color:#000;font-weight:600}
+    .muted{font-size:13px;color:var(--muted);text-align:center}
+    .secondary{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .hidden{display:none}
+    #messages{margin-top:12px;padding:10px;border-radius:8px;background:rgba(255,255,255,0.02);font-size:13px}
+    .oauths{display:flex;gap:8px;flex-direction:column}
+    .small{font-size:13px}
+    @media (max-width:420px){.wrap{padding:16px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Sign-up / Login</h1>
+
+    <div class="tabs" role="tablist">
+      <button id="tab-signup" class="active">Sign up</button>
+      <button id="tab-login">Login</button>
+      <button id="tab-forgot">Forgot password</button>
+    </div>
+
+    <!-- SIGN UP -->
+    <div id="panel-signup">
+      <form id="signup-form">
+        <div>
+          <label for="su-email">Email</label>
+          <input id="su-email" type="email" placeholder="you@gmail.com" required />
+        </div>
+        <div>
+          <label for="su-phone">Phone</label>
+          <input id="su-phone" type="tel" placeholder="xxxxxxxxxx" required />
+        </div>
+        <div>
+          <label for="su-password">New password</label>
+          <input id="su-password" type="password" minlength="6" placeholder="Enter a strong password" required />
+        </div>
+        <div class="row">
+          <button id="signup-btn" class="btn" type="submit">Create account</button>
+          <button id="verify-phone-btn" class="secondary" type="button">Verify phone (OTP)</button>
+        </div>
+
+        <div id="signup-otp-area" class="hidden">
+          <label for="su-otp">Enter OTP</label>
+          <div class="row">
+            <input id="su-otp" type="text" placeholder="123456" />
+            <button id="su-otp-verify" class="btn" type="button">Link phone</button>
+            
+          </div>
+        </div>
+        <div>
+          <button id="guest-login" 
+        style="background:white;color:black;font-weight:bold;
+               padding:10px 20px;border-radius:8px;margin-top:10px;
+               cursor:pointer;width:100%;">
+  Continue as Guest
+</button>
+</div>
+      </form>
+    </div>
+
+    <!-- LOGIN -->
+    <div id="panel-login" class="hidden">
+      <form id="login-form">
+        <div>
+          <label for="li-email">Email</label>
+          <input id="li-email" type="email" placeholder="you@gmail.com" required />
+        </div>
+        <div>
+          <label for="li-password">Password</label>
+          <input id="li-password" type="password" placeholder="Password" required />
+        </div>
+        <div class="row">
+          <button class="btn" type="submit">Login</button>
+          <button id="google-login" class="secondary" type="button">Login with Google</button>
+        </div>
+       <div>
+          <button id="guestLoginBtn" 
+        style="background:white;color:black;font-weight:bold;
+               padding:10px 20px;border-radius:8px;margin-top:10px;
+               cursor:pointer;width:100%;">
+  Continue as Guest
+</button>
+</div>
+      </form>
+    </div>
+
+    <!-- FORGOT -->
+    <div id="panel-forgot" class="hidden">
+      <form id="forgot-form">
+        <div>
+          <label for="fp-phone">Phone</label>
+          <input id="fp-phone" type="tel" placeholder="xxxxxxxxxx" required />
+        </div>
+        <div class="row">
+          <button id="fp-send-otp" class="btn" type="button">Send OTP</button>
+        </div>
+
+        <div id="forgot-otp-area" class="hidden">
+          <label for="fp-otp">Enter OTP</label>
+          <input id="fp-otp" type="text" placeholder="123456" />
+          <label for="fp-newpass">New password</label>
+          <input id="fp-newpass" type="password" placeholder="New password" minlength="6" />
+          <div class="row">
+            <button id="fp-reset" class="btn" type="button">Reset password</button>
+          </div>
+        </div>
+
+      </form>
+    </div>
+
+    <div id="messages" aria-live="polite"></div>
+
+    <!-- invisible reCAPTCHA container required by Firebase Phone Auth -->
+    <div id="recaptcha-container"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      GoogleAuthProvider,
+      signInWithPopup,
+      signInAnonymously,
+      RecaptchaVerifier,
+      signInWithPhoneNumber,
+      PhoneAuthProvider,
+      linkWithCredential,
+      updatePassword,
+      onAuthStateChanged
+    } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCSSQizb5s4CFNqoBHiTgv4BJ_L4q0PWCg",
+      authDomain: "portfolio-fd32b.firebaseapp.com",
+      projectId: "portfolio-fd32b",
+      storageBucket: "portfolio-fd32b.firebasestorage.app",
+      messagingSenderId: "986731814763",
+      appId: "1:986731814763:web:4adb1c500457c75f2af62e",
+      measurementId: "G-0CN0ZK5YJS"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    const tabs = { signup: document.getElementById('tab-signup'), login: document.getElementById('tab-login'), forgot: document.getElementById('tab-forgot') };
+    const panels = { signup: document.getElementById('panel-signup'), login: document.getElementById('panel-login'), forgot: document.getElementById('panel-forgot') };
+    const msg = document.getElementById('messages');
+
+    function showPanel(p){
+      Object.values(tabs).forEach(b=>b.classList.remove('active'));
+      Object.values(panels).forEach(pn=>pn.classList.add('hidden'));
+      tabs[p].classList.add('active');
+      panels[p].classList.remove('hidden');
+      msg.textContent='';
+    }
+
+    tabs.signup.addEventListener('click', ()=>showPanel('signup'));
+    tabs.login.addEventListener('click', ()=>showPanel('login'));
+    tabs.forgot.addEventListener('click', ()=>showPanel('forgot'));
+
+    function showMessage(text, isError){
+      msg.textContent = text;
+      msg.style.color = isError ? '#ff6b6b' : '#9be7a9';
+    }
+
+    // SIGN UP
+    const signupForm = document.getElementById('signup-form');
+    const suEmail = document.getElementById('su-email');
+    const suPhone = document.getElementById('su-phone');
+    const suPassword = document.getElementById('su-password');
+    const verifyPhoneBtn = document.getElementById('verify-phone-btn');
+    const signupOtpArea = document.getElementById('signup-otp-area');
+    const suOtpInput = document.getElementById('su-otp');
+    const suOtpVerifyBtn = document.getElementById('su-otp-verify');
+
+    let linkingVerificationId = null;
+
+    signupForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = suEmail.value.trim();
+      const phone = suPhone.value.trim();
+      const password = suPassword.value;
+      showMessage('Creating account...');
+      try{
+        await createUserWithEmailAndPassword(auth, email, password);
+        showMessage('Account created. Redirecting...');
+        window.location.href = "index.html";
+      }catch(err){
+        showMessage(err.message, true);
+      }
+    });
+
+    verifyPhoneBtn.addEventListener('click', async ()=>{
+      const phone = suPhone.value.trim();
+      if(!phone){ showMessage('Enter phone first', true); return; }
+      try{
+        window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { size: 'invisible' }, auth);
+        showMessage('Sending OTP...');
+        const confirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+        linkingVerificationId = confirmationResult.verificationId;
+        signupOtpArea.classList.remove('hidden');
+        showMessage('OTP sent to ' + phone + '. Enter it and click Link phone.');
+      }catch(err){
+        showMessage('Error sending OTP: ' + err.message, true);
+        if(window.recaptchaVerifier && window.recaptchaVerifier.clear) window.recaptchaVerifier.clear();
+      }
+    });
+
+    suOtpVerifyBtn.addEventListener('click', async ()=>{
+      const code = suOtpInput.value.trim();
+      if(!code || !linkingVerificationId){ showMessage('No OTP or verification id', true); return; }
+      try{
+        const phoneCredential = PhoneAuthProvider.credential(linkingVerificationId, code);
+        await linkWithCredential(auth.currentUser, phoneCredential);
+        showMessage('Phone successfully linked.');
+      }catch(err){
+        showMessage('Failed to link phone: ' + err.message, true);
+      }
+    });
+
+    // LOGIN
+    const loginForm = document.getElementById('login-form');
+    const liEmail = document.getElementById('li-email');
+    const liPassword = document.getElementById('li-password');
+
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const email = liEmail.value.trim();
+      const password = liPassword.value;
+      showMessage('Signing in...');
+      try{
+        await signInWithEmailAndPassword(auth, email, password);
+        showMessage('Signed in successfully. Redirecting...');
+        window.location.href = "index.html";
+      }catch(err){
+        showMessage(err.message, true);
+      }
+    });
+
+    // GOOGLE LOGIN
+    const googleBtn = document.getElementById('google-login');
+    googleBtn.addEventListener('click', async ()=>{
+      const provider = new GoogleAuthProvider();
+      try{
+        await signInWithPopup(auth, provider);
+        showMessage('Signed in with Google. Redirecting...');
+        window.location.href = "index.html";
+      }catch(err){ showMessage(err.message, true); }
+    });
+
+    // GUEST LOGIN
+    const guestBtn = document.getElementById('guest-login');
+    guestBtn.addEventListener('click', async ()=>{
+      try{
+        await signInAnonymously(auth);
+        showMessage('Signed in as guest. Redirecting...');
+        window.location.href = "index.html";
+      }catch(err){ showMessage(err.message, true); }
+    });
+
+    // FORGOT PASSWORD
+    const fpPhone = document.getElementById('fp-phone');
+    const fpSendOtp = document.getElementById('fp-send-otp');
+    const forgotOtpArea = document.getElementById('forgot-otp-area');
+    const fpOtp = document.getElementById('fp-otp');
+    const fpNewpass = document.getElementById('fp-newpass');
+    const fpReset = document.getElementById('fp-reset');
+
+    let forgotConfirmationResult = null;
+
+    fpSendOtp.addEventListener('click', async ()=>{
+      const phone = fpPhone.value.trim();
+      if(!phone){ showMessage('Enter phone', true); return; }
+      try{
+        window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { size:'invisible' }, auth);
+        showMessage('Sending OTP...');
+        forgotConfirmationResult = await signInWithPhoneNumber(auth, phone, window.recaptchaVerifier);
+        forgotOtpArea.classList.remove('hidden');
+        showMessage('OTP sent — enter it and set a new password.');
+      }catch(err){ showMessage('Error sending OTP: ' + err.message, true); if(window.recaptchaVerifier && window.recaptchaVerifier.clear) window.recaptchaVerifier.clear(); }
+    });
+
+    fpReset.addEventListener('click', async ()=>{
+      const code = fpOtp.value.trim();
+      const newPass = fpNewpass.value;
+      if(!code || !forgotConfirmationResult){ showMessage('No OTP or missing confirmation.', true); return; }
+      try{
+        const userCred = await forgotConfirmationResult.confirm(code);
+        const u = userCred.user;
+        const hasPasswordProvider = (u.providerData || []).some(p=>p.providerId === 'password');
+        if(!hasPasswordProvider){
+          showMessage('This phone number is not linked to an email/password account.', true);
+          return;
+        }
+        await updatePassword(u, newPass);
+        showMessage('Password updated. Redirecting...');
+        window.location.href = "index.html";
+      }catch(err){ showMessage('Failed to reset password: ' + err.message, true); }
+    });
+
+    onAuthStateChanged(auth, (user)=>{
+      if(user){
+        console.log('SIGNED IN:', user.uid);
+      }else{
+        console.log('signed out');
+      }
+    });
+  </script>
+  <script type="module">
+  import { getAuth, signInAnonymously } 
+  from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+
+  const auth = getAuth();
+
+  document.getElementById("guestLoginBtn").addEventListener("click", () => {
+    signInAnonymously(auth)
+      .then(() => {
+        window.location.href = "index.html";  // ✅ redirect
+      })
+      .catch((error) => {
+        alert("Guest login failed: " + error.message);
+      });
+  });
+</script>
+
+</body>
+</html>
