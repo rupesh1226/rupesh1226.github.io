@@ -4,7 +4,7 @@ Welcome to my personal portfolio website!
 This project showcases my skills, projects, resume, and contact information as an aspiring **Data Analyst** and **Front-End Developer**.
 
 ## 🚀 Live Website
-🌍 Visit Here: [https://rupesh1226.github.io/portfolio-website](https://reference-url-citation.invalid/0)
+🌍 Visit Here: [Portfolio](https://rupesh1226.github.io/portfolio-website/)
 
 ## 📌 Features
 - Responsive Portfolio Design
