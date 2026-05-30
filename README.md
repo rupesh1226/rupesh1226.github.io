@@ -7,7 +7,7 @@ This project showcases my skills, projects, resume, and contact information as a
 🌍 Visit Here: [Portfolio](https://rupesh1226.github.io/portfolio-website/)
 
 ## Screenshot
-![portfolio](portfolio.png)
+![portfolio-website](portfolio.png)
 
 ## 📌 Features
 - Responsive Portfolio Design
