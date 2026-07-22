@@ -21,6 +21,10 @@ const CERTS = {
     title: '🏆 Alibaba Cloud Certification',
     img:   'images/certificates/alibaba-cert.jpg',
   },
+   Microsoft: {
+    title: '🏆 Microsoft Certified: Fabric Data Engineer Associate',
+    img:   'images/certificates/microsoft-cert.jpg',
+  },
 };
 
 // ─── PROJECT LINK OPENER ────────────────────────────────────────
