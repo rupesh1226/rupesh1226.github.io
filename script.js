@@ -23,7 +23,7 @@ const CERTS = {
   },
    Microsoft: {
     title: '🏆 Microsoft Certified: Fabric Data Engineer Associate',
-    img:   'images/certificates/microsoft-cert.jpg',
+    img:   'images/certificates/Microsoft-cert.jpg',
   },
 };
 
