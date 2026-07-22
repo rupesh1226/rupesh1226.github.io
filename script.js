@@ -25,6 +25,10 @@ const CERTS = {
     title: '🏆 Microsoft Certified: Fabric Data Engineer Associate',
     img:   'images/certificates/Microsoft-cert.jpg',
   },
+  csdm: {
+    title: '🏆 Certified Implementation Specialist - Data Foundations (CMDB & CSDM)',
+    img:   'images/certificates/csdm-cert.jpg',
+  },
 };
 
 // ─── PROJECT LINK OPENER ────────────────────────────────────────
