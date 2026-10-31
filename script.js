@@ -2,7 +2,7 @@
 // ─── LINKS CONFIG — replace with your real URLs ─────────────────
 const PROJECTS = {
   airbnb: 'https://github.com/rupesh1226/Airbnb-Price-Analysis',
-  ai-dashboard: 'https://github.com/rupesh1226/AI-Business-Intelligence-Dashboard',
+  'ai-dashboard': 'https://github.com/rupesh1226/AI-Business-Intelligence-Dashboard',
   tts:    'https://github.com/rupesh1226/text-to-speech',
   figma1: 'https://www.figma.com/proto/l0BzmlsWRxddBwdL9y2nqN/Rupesh?page-id=0%3A1&node-id=1-2&p=f&viewport=1144%2C578%2C0.16&t=rK501qm6vS6XxSf0-1&scaling=scale-down&content-scaling=fixed&starting-point-node-id=1%3A2&show-proto-sidebar=1',
   figma2: 'https://www.figma.com/proto/KgjjilIwgJHmWJ0WhaIEPe/Untitled?page-id=0%3A1&node-id=1-1269&p=f&viewport=73%2C372%2C0.18&t=IglpuYN9VVdzoFcx-1&scaling=min-zoom&content-scaling=fixed&starting-point-node-id=1%3A1269',
